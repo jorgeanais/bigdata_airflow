@@ -59,7 +59,7 @@ with DAG(
 
     gcs_to_bq_example = GCSToBigQueryOperator(
         task_id="gcs_to_bq_example",
-        bucket='{}-data-bucket'.format(GCP_PROJECT_ID),
+        bucket=BUCKET_NAME,
         source_objects=['mysql_export/from_composer/stations/stations.csv'],
         destination_project_dataset_table='raw_bikesharing.stations',
         schema_fields=[
