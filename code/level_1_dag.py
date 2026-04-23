@@ -14,17 +14,19 @@
 
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from airflow.utils.dates import days_ago
+import pendulum # Usar pendulum es el estándar moderno en Airflow
 
 args = {
-    'owner': 'packt-developer',
+    'owner': 'mad-developer',
 }
 
 with DAG(
     dag_id='hello_world_airflow',
     default_args=args,
     schedule='0 5 * * *',
-    start_date=days_ago(1),
+    # pendulum.today('UTC').subtract(days=1) es el equivalente a days_ago(1)
+    start_date=pendulum.datetime(2026, 4, 1, tz="UTC"), 
+    catchup=False,
 ) as dag:
 
     print_hello = BashOperator(
@@ -38,6 +40,3 @@ with DAG(
     )
 
     print_hello >> print_world
-
-if __name__ == "__main__":
-    dag.cli()

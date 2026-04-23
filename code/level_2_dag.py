@@ -19,16 +19,17 @@ from airflow.providers.google.cloud.operators.cloud_sql import \
     CloudSQLExportInstanceOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import \
     GCSToBigQueryOperator
-from airflow.utils.dates import days_ago
+import pendulum # Usar pendulum es el estándar moderno en Airflow
 
 args = {
-    'owner': 'packt-developer',
+    'owner': 'mad-developer',
 }
 
-GCP_PROJECT_ID = 'YOUR GCP PROJECT ID'
-INSTANCE_NAME = 'YOUR CLOUD SQL INSTANCE NAME'
-EXPORT_URI = 'gs://{PROJECT_ID}-data-bucket/mysql_export/from_composer/stations/stations.csv'.format(
-    PROJECT_ID=GCP_PROJECT_ID)
+GCP_PROJECT_ID = 'teaching-494213'
+INSTANCE_NAME = 'mysql-instance-source'
+BUCKET_NAME = 'bigdata-data-bucket'
+EXPORT_URI = 'gs://{BUCKET}/mysql_export/from_composer/stations/stations.csv'.format(
+    BUCKET=BUCKET_NAME)
 SQL_QUERY = "SELECT * FROM apps_db.stations"
 
 export_body = {
@@ -45,7 +46,8 @@ with DAG(
     dag_id='level_2_dag_load_bigquery',
     default_args=args,
     schedule='0 5 * * *',
-    start_date=days_ago(1),
+    start_date=pendulum.datetime(2026, 4, 1, tz="UTC"),
+    catchup=False,
 ) as dag:
 
     sql_export_task = CloudSQLExportInstanceOperator(
@@ -89,5 +91,3 @@ with DAG(
 
     sql_export_task >> gcs_to_bq_example >> bq_to_bq
 
-if __name__ == "__main__":
-    dag.cli()
